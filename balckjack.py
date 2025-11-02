@@ -1,27 +1,19 @@
 import os
 import random
 
-
 # -------- Utility functions --------
+
+
 def clear_screen():
     """Clear the console screen."""
     os.system('cls' if os.name == 'nt' else 'clear')
 
-
 # -------- Card visuals --------
-def card_string(card):
-    """Convert card value to its string representation."""
-    if card == 11:
-        return 'A'
-    elif card == 10:
-        random_face = random.choice(['10', 'J', 'Q', 'K'])
-        return random_face
-    else:
-        return str(card)
 
 
 def display_card_lines(card):
-    card_str = card_string(card)
+    """Return card as a list of strings for printing."""
+    value, card_str = card
     return [
         "┌─────────┐",
         f"│{card_str:<2}       │",
@@ -65,11 +57,41 @@ def print_dealer_cards(first_card, hide_second=True):
     for i in range(len(cards_to_print[0])):
         print("  ".join(card[i] for card in cards_to_print))
 
-
 # -------- Game logic --------
-cards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11]
-deck = cards * 4
+# Build deck with (value, display) tuples
+
+
+values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+deck = []
+for value in values:
+    for _ in range(4):
+        if value == 10:
+            display = random.choice(['10', 'J', 'Q', 'K'])
+        elif value == 11:
+            display = 'A'
+        else:
+            display = str(value)
+        deck.append((value, display))
+
+random.shuffle(deck)
 hands = {"player": [], "dealer": []}
+
+# Calculate total value of a hand, handling aces
+
+
+def hand_value(hand):
+    total = 0
+    aces = 0
+    for value, _ in hand:
+        total += value
+        if value == 11:
+            aces += 1
+    while total > 21 and aces:
+        total -= 10
+        aces -= 1
+    return total
+
+# -------- Game functions --------
 
 
 def game_start():
@@ -77,141 +99,69 @@ def game_start():
     random.shuffle(deck)
     hands['player'] = [deck.pop(), deck.pop()]
     hands['dealer'] = [deck.pop(), deck.pop()]
-    # Check for immediate blackjack
+
+    clear_screen()
     print('Deck is shuffled and cards are dealt.')
     print('--------------------------------')
-    if (
-        sum(hands['player']) == 21
-        and (hands['dealer'][0] == 11 or hands['dealer'][0] == 10)
-    ):
-        print("Dealer's hand:")
-        print_dealer_cards(hands['dealer'][0], hide_second=True)
-        print('--------------------------------')
-        print("Player's hand:")
-        print_cards_side_by_side(hands['player'])
-        print('--------------------------------')
-        print("Player has blackjack!")
-        print('--------------------------------')
-        print("Check if dealer also has blackjack...")
-        input('Press "Enter" to continue...')
-        clear_screen()
-        if sum(hands['dealer']) == 21:
-            print("Dealer's hand:")
-            print_cards_side_by_side(hands['dealer'])
-            print("Both player and dealer have blackjack! It's a tie!")
-            input('Press "Enter" to restart...')
-            clear_screen()
-            game_start()
-            return
-        else:
-            print_cards_side_by_side(hands['dealer'])
-            print('--------------------------------')
-            print("Dealer doesn't have blackjack! Player wins!")
-            print('--------------------------------')
-            print_cards_side_by_side(hands['player'])
-            print('--------------------------------')
-            print("Player wins with blackjack!")
-            print('--------------------------------')
-            print(
-                f"Dealer's total: {sum(hands['dealer'])} vs "
-                f"Player's total: {sum(hands['player'])}"
-            )
-            print('--------------------------------')
-            input('Press "Enter" to restart...')
-            clear_screen()
-            game_start()
-            return
-    if hands['dealer'][0] == 11 or hands['dealer'][0] == 10:
-        print_dealer_cards(hands['dealer'][0], hide_second=True)
-        print('--------------------------------')
-        print_cards_side_by_side(hands['player'])
-        print(f"\nPlayer's total: {sum(hands['player'])}")
-        print('--------------------------------')
-        print('Dealer has a potential blackjack.')
-        print('--------------------------------')
-        print("Checking for dealer blackjack...")
-        input('Press "Enter" to continue...')
-        clear_screen()
-        if sum(hands['dealer']) == 21:
-            print("Dealer's hand:")
-            print_cards_side_by_side(hands['dealer'])
-            print("Dealer has blackjack!")
-            input('Press "Enter" to restart...')
-            clear_screen()
-            game_start()
-            return
-        else:
-            print("No blackjack for dealer.")
-            input('Press "Enter" to continue...')
-            clear_screen()
-    if sum(hands['player']) == 21:
-        print("Dealer's hand:")
-        print_cards_side_by_side(hands['dealer'])
-        print('--------------------------------')
-        print("Player's hand:")
-        print_cards_side_by_side(hands['player'])
-        print("Player has blackjack!")
-        input('Press "Enter" to restart...')
-        clear_screen()
-        game_start()
-        return
-    print('--------------------------------')
+
+    # Show initial hands
     print("Dealer's hand:")
     print_dealer_cards(hands['dealer'][0], hide_second=True)
     print('--------------------------------')
     print("Player's hand:")
     print_cards_side_by_side(hands['player'])
-    print(f"\nPlayer's total: {sum(hands['player'])}")
+    print(f"\nPlayer's total: {hand_value(hands['player'])}")
     print('--------------------------------')
+
+    # Check for immediate blackjack
+    player_total = hand_value(hands['player'])
+    dealer_total = hand_value(hands['dealer'])
+
+    if player_total == 21:
+        print("Player has blackjack!")
+        if dealer_total == 21:
+            print("Dealer also has blackjack! It's a tie!")
+        else:
+            print("Player wins with blackjack!")
+        input('Press "Enter" to restart...')
+        clear_screen()
+        game_start()
+        return
+    if dealer_total == 21:
+        print("Dealer has blackjack!")
+        input('Press "Enter" to restart...')
+        clear_screen()
+        game_start()
+        return
+
     player_hit()
 
 
 def dealer_turn():
-    while sum(hands['dealer']) < 17:
+    while hand_value(hands['dealer']) < 17:
         hands['dealer'].append(deck.pop())
+
     clear_screen()
     print("Dealer's turn:")
     print_cards_side_by_side(hands['dealer'])
-    print(f"Dealer's total: {sum(hands['dealer'])}")
+    dealer_total = hand_value(hands['dealer'])
+    player_total = hand_value(hands['player'])
+    print(f"Dealer's total: {dealer_total}")
     print('--------------------------------')
-    if sum(hands['dealer']) > 21:
+
+    if dealer_total > 21:
         print("Dealer busts! Player wins!")
-    elif sum(hands['dealer']) == 21:
-        print("Blackjack! Dealer wins!")
-    elif sum(hands['dealer']) > sum(hands['player']):
-        print_cards_side_by_side(hands['player'])
-        print(f"\nPlayer's total: {sum(hands['player'])}")
-        print('--------------------------------')
-        print(
-            f"Dealer's total: {sum(hands['dealer'])} vs "
-            f"Player's total: {sum(hands['player'])}"
-        )
-        print('--------------------------------')
-        print("Dealer wins!")
-    elif sum(hands['dealer']) == sum(hands['player']):
-        print_cards_side_by_side(hands['player'])
-        print(f"\nPlayer's total: {sum(hands['player'])}")
-        print('--------------------------------')
-        print(
-            f"Dealer's total: {sum(hands['dealer'])} vs "
-            f"Player's total: {sum(hands['player'])}"
-        )
-        print('--------------------------------')
-        print("It's a tie!")
+    elif dealer_total > player_total:
+        print(f"Dealer wins! ({dealer_total} vs {player_total})")
+    elif dealer_total == player_total:
+        print(f"It's a tie! ({dealer_total} vs {player_total})")
     else:
-        print_cards_side_by_side(hands['player'])
-        print(f"\nPlayer's total: {sum(hands['player'])}")
-        print('--------------------------------')
-        print(
-            f"Dealer's total: {sum(hands['dealer'])} vs "
-            f"Player's total: {sum(hands['player'])}"
-        )
-        print('--------------------------------')
-        print("Player wins!")
+        print(f"Player wins! ({player_total} vs {dealer_total})")
+
     print('--------------------------------')
     input('Press "Enter" to restart...')
     clear_screen()
-    game_start()
+    main()
 
 
 def player_hit():
@@ -221,29 +171,22 @@ def player_hit():
         hands['player'].append(deck.pop())
         clear_screen()
         print("Player hits.")
-        if sum(hands['player']) > 21:
-            print("Player's hand:")
-            print_cards_side_by_side(hands['player'])
-            print(f"\nPlayer's total: {sum(hands['player'])}")
+        total = hand_value(hands['player'])
+        print("Player's hand:")
+        print_cards_side_by_side(hands['player'])
+        print(f"\nPlayer's total: {total}")
+        print('--------------------------------')
+        if total > 21:
             print("Player busts! Dealer wins.")
             input('Press "Enter" to restart...')
             clear_screen()
-            game_start()
-            return
-        elif sum(hands['player']) == 21:
-            print("Player's hand:")
-            print_cards_side_by_side(hands['player'])
-            print(f"\nPlayer's total: {sum(hands['player'])}")
+            main()
+        elif total == 21:
             print("Blackjack!")
-            input('Dealers turn, press "Enter" to continue...')
+            input('Dealer turn, press "Enter" to continue...')
             clear_screen()
             dealer_turn()
-            return
         else:
-            print("Player's hand:")
-            print_cards_side_by_side(hands['player'])
-            print(f"\nPlayer's total: {sum(hands['player'])}")
-            print('--------------------------------')
             player_hit()
     elif choice == 's':
         dealer_turn()
@@ -251,8 +194,18 @@ def player_hit():
         print("Invalid input.")
         player_hit()
 
-
 # -------- Entry point --------
+
+
+def main():
+    while True:
+        clear_screen()
+        print('--------------------------------')
+        print('Python Blackjack has been initiated!')
+        input('Press Enter to continue...')
+        game_start()
+
+
 clear_screen()
 print('--------------------------------')
 print('Python Blackjack has been initiated!')
