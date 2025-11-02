@@ -80,13 +80,57 @@ def game_start():
     # Check for immediate blackjack
     print('Deck is shuffled and cards are dealt.')
     print('--------------------------------')
+    if (
+        sum(hands['player']) == 21
+        and (hands['dealer'][0] == 11 or hands['dealer'][0] == 10)
+    ):
+        print("Dealer's hand:")
+        print_dealer_cards(hands['dealer'][0], hide_second=True)
+        print('--------------------------------')
+        print("Player's hand:")
+        print_cards_side_by_side(hands['player'])
+        print('--------------------------------')
+        print("Player has blackjack!")
+        print('--------------------------------')
+        print("Check if dealer also has blackjack...")
+        input('Press "Enter" to continue...')
+        clear_screen()
+        if sum(hands['dealer']) == 21:
+            print("Dealer's hand:")
+            print_cards_side_by_side(hands['dealer'])
+            print("Both player and dealer have blackjack! It's a tie!")
+            input('Press "Enter" to restart...')
+            clear_screen()
+            game_start()
+            return
+        else:
+            print_cards_side_by_side(hands['dealer'])
+            print('--------------------------------')
+            print("Dealer doesn't have blackjack! Player wins!")
+            print('--------------------------------')
+            print_cards_side_by_side(hands['player'])
+            print('--------------------------------')
+            print("Player wins with blackjack!")
+            print('--------------------------------')
+            print(
+                f"Dealer's total: {sum(hands['dealer'])} vs "
+                f"Player's total: {sum(hands['player'])}"
+            )
+            print('--------------------------------')
+            input('Press "Enter" to restart...')
+            clear_screen()
+            game_start()
+            return
     if hands['dealer'][0] == 11 or hands['dealer'][0] == 10:
         print_dealer_cards(hands['dealer'][0], hide_second=True)
+        print('Dealer has a potential blackjack.')
+        print('--------------------------------')
         print("Checking for dealer blackjack...")
+        input('Press "Enter" to continue...')
+        clear_screen()
         if sum(hands['dealer']) == 21:
-            clear_screen()
             print("Dealer's hand:")
-            print_dealer_cards(hands['dealer'][0], hide_second=False)
+            print_cards_side_by_side(hands['dealer'])
             print("Dealer has blackjack!")
             input('Press "Enter" to restart...')
             clear_screen()
@@ -127,19 +171,36 @@ def dealer_turn():
     elif sum(hands['dealer']) == 21:
         print("Blackjack! Dealer wins!")
     elif sum(hands['dealer']) > sum(hands['player']):
+        print_cards_side_by_side(hands['player'])
+        print(f"\nPlayer's total: {sum(hands['player'])}")
+        print('--------------------------------')
+        print(
+            f"Dealer's total: {sum(hands['dealer'])} vs "
+            f"Player's total: {sum(hands['player'])}"
+        )
+        print('--------------------------------')
         print("Dealer wins!")
+    elif sum(hands['dealer']) == sum(hands['player']):
         print_cards_side_by_side(hands['player'])
+        print(f"\nPlayer's total: {sum(hands['player'])}")
+        print('--------------------------------')
         print(
             f"Dealer's total: {sum(hands['dealer'])} vs "
             f"Player's total: {sum(hands['player'])}"
         )
+        print('--------------------------------')
+        print("It's a tie!")
     else:
-        print("Player wins!")
         print_cards_side_by_side(hands['player'])
+        print(f"\nPlayer's total: {sum(hands['player'])}")
+        print('--------------------------------')
         print(
             f"Dealer's total: {sum(hands['dealer'])} vs "
             f"Player's total: {sum(hands['player'])}"
         )
+        print('--------------------------------')
+        print("Player wins!")
+    print('--------------------------------')
     input('Press "Enter" to restart...')
     clear_screen()
     game_start()
