@@ -123,6 +123,10 @@ def game_start():
             return
     if hands['dealer'][0] == 11 or hands['dealer'][0] == 10:
         print_dealer_cards(hands['dealer'][0], hide_second=True)
+        print('--------------------------------')
+        print_cards_side_by_side(hands['player'])
+        print(f"\nPlayer's total: {sum(hands['player'])}")
+        print('--------------------------------')
         print('Dealer has a potential blackjack.')
         print('--------------------------------')
         print("Checking for dealer blackjack...")
@@ -140,6 +144,17 @@ def game_start():
             print("No blackjack for dealer.")
             input('Press "Enter" to continue...')
             clear_screen()
+    if sum(hands['player']) == 21:
+        print("Dealer's hand:")
+        print_cards_side_by_side(hands['dealer'])
+        print('--------------------------------')
+        print("Player's hand:")
+        print_cards_side_by_side(hands['player'])
+        print("Player has blackjack!")
+        input('Press "Enter" to restart...')
+        clear_screen()
+        game_start()
+        return
     print('--------------------------------')
     print("Dealer's hand:")
     print_dealer_cards(hands['dealer'][0], hide_second=True)
@@ -148,14 +163,7 @@ def game_start():
     print_cards_side_by_side(hands['player'])
     print(f"\nPlayer's total: {sum(hands['player'])}")
     print('--------------------------------')
-    if sum(hands['player']) == 21:
-        print("Blackjack! Player wins!")
-        input('Press "Enter" to restart...')
-        clear_screen()
-        game_start()
-        return
-    else:
-        player_hit()
+    player_hit()
 
 
 def dealer_turn():
@@ -246,6 +254,7 @@ def player_hit():
 
 # -------- Entry point --------
 clear_screen()
+print('--------------------------------')
 print('Python Blackjack has been initiated!')
 input('Press Enter to continue...')
 game_start()
