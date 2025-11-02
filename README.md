@@ -120,6 +120,23 @@ def display_card_lines(card):
 ```
 </details>
 
+<details><summary>Calculating Hand Value</summary>
+
+```python
+def hand_value(hand):
+    total = 0
+    aces = 0
+    for value, _ in hand:
+        total += value
+        if value == 11:
+            aces += 1
+    while total > 21 and aces:
+        total -= 10
+        aces -= 1
+    return total
+```
+</details>
+
 <details><summary>Clearing the Screen</summary>
 
 ```python
