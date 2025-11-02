@@ -88,13 +88,13 @@ def game_start():
             print("Dealer's hand:")
             print_dealer_cards(hands['dealer'][0], hide_second=False)
             print("Dealer has blackjack!")
-            input('Press Enter to restart...')
+            input('Press "Enter" to restart...')
             clear_screen()
             game_start()
             return
         else:
             print("No blackjack for dealer.")
-            input('Press Enter to continue...')
+            input('Press "Enter" to continue...')
             clear_screen()
     print('--------------------------------')
     print("Dealer's hand:")
@@ -106,7 +106,7 @@ def game_start():
     print('--------------------------------')
     if sum(hands['player']) == 21:
         print("Blackjack! Player wins!")
-        input('Press Enter to restart...')
+        input('Press "Enter" to restart...')
         clear_screen()
         game_start()
         return
@@ -140,13 +140,13 @@ def dealer_turn():
             f"Dealer's total: {sum(hands['dealer'])} vs "
             f"Player's total: {sum(hands['player'])}"
         )
-    input('Press Enter to restart...')
+    input('Press "Enter" to restart...')
     clear_screen()
     game_start()
 
 
 def player_hit():
-    print('Enter h to hit or s to stand:')
+    print('Enter "h" to hit or "s" to stand:')
     choice = input().lower()
     if choice == 'h':
         hands['player'].append(deck.pop())
@@ -157,9 +157,18 @@ def player_hit():
             print_cards_side_by_side(hands['player'])
             print(f"\nPlayer's total: {sum(hands['player'])}")
             print("Player busts! Dealer wins.")
-            input('Press Enter to restart...')
+            input('Press "Enter" to restart...')
             clear_screen()
             game_start()
+            return
+        elif sum(hands['player']) == 21:
+            print("Player's hand:")
+            print_cards_side_by_side(hands['player'])
+            print(f"\nPlayer's total: {sum(hands['player'])}")
+            print("Blackjack!")
+            input('Dealers turn, press "Enter" to continue...')
+            clear_screen()
+            dealer_turn()
             return
         else:
             print("Player's hand:")
