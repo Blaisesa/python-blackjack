@@ -95,6 +95,7 @@ def hand_value(hand):
 
 
 def game_start():
+    reset_deck()
     """Start a round of Blackjack."""
     random.shuffle(deck)
     hands['player'] = [deck.pop(), deck.pop()]
@@ -197,7 +198,24 @@ def player_hit():
 # -------- Entry point --------
 
 
+def reset_deck():
+    global deck
+    values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    deck = []
+    for value in values:
+        for _ in range(4):
+            if value == 10:
+                display = random.choice(['10', 'J', 'Q', 'K'])
+            elif value == 11:
+                display = 'A'
+            else:
+                display = str(value)
+            deck.append((value, display))
+    random.shuffle(deck)
+
+
 def main():
+    reset_deck()
     while True:
         clear_screen()
         print('--------------------------------')
